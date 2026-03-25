@@ -26,6 +26,10 @@ body{
     
 }
 
+.pressed {
+    background: white;
+}
+
 #header{
     display: flex;
     justify-content: center;
