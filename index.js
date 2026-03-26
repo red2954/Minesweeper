@@ -1,8 +1,9 @@
 class Block {
-    constructor(isBomb, bombsNearby, isPressed) {
+    constructor(isBomb, bombsNearby, isPressed, isFlagged) {
         this._isBomb = isBomb
         this._bombsNearby = bombsNearby
         this._isPressed = isPressed
+        this._isFlagged = isFlagged
     }
 
     get isBomb() {
@@ -27,6 +28,14 @@ class Block {
 
     set isPressed(value) {
         this._isPressed = value
+    }
+
+    get isFlagged(){
+        return this._isFlagged
+    }
+
+    set isFlagged(value){
+        this._isFlagged = value
     }
 
     increment() {
@@ -67,7 +76,7 @@ function showBlocksWithoutBombs(blocks, row, col){
 
     const block = blocks[row][col]
 
-    if (block.isBomb || block.isPressed) 
+    if (block.isBomb || block.isPressed || block.isFlagged) 
         return
 
     block.isPressed = true
@@ -86,11 +95,17 @@ function showBlocksWithoutBombs(blocks, row, col){
 function renderBoard(blocks){
     const boxes = document.querySelectorAll(".box")
     boxes.forEach((box, i) =>{
-        box.textContent = ""
-        box.classList.remove("pressed")
         const row = Math.floor(i / 5)
         const col = i % 5
         const block = blocks[row][col]
+
+        box.textContent = "";
+        box.classList.remove("pressed");
+
+        if(block.isFlagged && !block.isPressed){
+            box.textContent = "🚩"
+            return;
+        }
 
         if (!block.isPressed) return
 
@@ -105,20 +120,25 @@ function renderBoard(blocks){
 }
 
 
+
 let blocks = []
 let gameOver = false
 const restart = document.getElementById("face")
 restart.addEventListener("click", () =>{
+    const oldMsg = document.getElementById("GameOverMessage")
+    if(oldMsg)
+        oldMsg.remove()
+    gameOver = false
     for (let i = 0; i < 5; i++) {
         blocks[i] = [] 
         for (let j = 0; j < 5; j++) {
-            blocks[i][j] = new Block(false, 0, false)
+            blocks[i][j] = new Block(false, 0, false, false)
         }
     }
     let nrBombs = 0
     while(nrBombs < 4){
-        let number1 = Math.floor(Math.random() * (5 - 0))
-        let number2 = Math.floor(Math.random() * (5 - 0))
+        let number1 = Math.floor(Math.random() * 5)
+        let number2 = Math.floor(Math.random() * 5)
         if(!blocks[number1][number2].isBomb){
             blocks[number1][number2].isBomb = true
             nrBombs++
@@ -133,29 +153,44 @@ restart.addEventListener("click", () =>{
         const row = Math.floor(i / 5)
         const col = i % 5
         box.onclick = () => {
+            if(gameOver)
+                return
             const block = blocks[row][col]
-            if(block.isBomb){
-                block.isPressed = true
-                if(!gameOver){
-                    const newDiv = document.createElement("h2")
-                    const text = document.createTextNode("Game Over! Good luck next time!")
-                    document.querySelector("body").appendChild(newDiv)
-                    newDiv.appendChild(text)
-                    gameOver = true
-                }
-                renderBoard(blocks)
-            
-                
-            }
-            else
-                if(block.bombsNearby != 0){
+            if(!block.isFlagged){
+                if(block.isBomb){
                     block.isPressed = true
+                    if(!gameOver){
+                        const newDiv = document.createElement("h2")
+                        newDiv.id = "GameOverMessage"
+                        const text = document.createTextNode("Game Over! Good luck next time!")
+                        document.querySelector("body").appendChild(newDiv)
+                        newDiv.appendChild(text)
+                        gameOver = true
+                    }
                     renderBoard(blocks)
                 }
-                else{
-                    showBlocksWithoutBombs(blocks, row, col)
-                    renderBoard(blocks)
-                }
+                else
+                    if(block.bombsNearby != 0){
+                        block.isPressed = true
+                        renderBoard(blocks)
+                    }
+                    else{
+                        showBlocksWithoutBombs(blocks, row, col)
+                        renderBoard(blocks)
+                    }
+            }
+        }
+        box.oncontextmenu = (e) =>{
+            e.preventDefault();
+
+            if (gameOver) 
+                return;
+
+            const block = blocks[row][col];
+            if (block.isPressed) return;
+
+            block.isFlagged = !block.isFlagged;
+            renderBoard(blocks);
         }
     })
 })
