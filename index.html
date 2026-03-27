@@ -4,38 +4,25 @@
         <link rel="stylesheet" href="index.css" />
         <title>Minesweeper</title>
         <link rel="icon" type="image/png" href="icon.png">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Carter+One&display=swap" rel="stylesheet">
     </head>
 
     <body>
-        <h1 id="header">Minesweeper</h1> 
-        <button id="face"></button>
+        <h1>Minesweeper</h1>
+        
+        <div id="difficulties">
+            <h3> Select difficulty </h3>
+            <button class="difficulty green"> Easy </button>
+            <button class="difficulty yellow"> Intermediate </button> 
+            <button class="difficulty red"> Expert </button>
         </div>
-        <div id="container">
-            <div class="box">1</div>
-            <div class="box">2</div>
-            <div class="box">3</div>
-            <div class="box">4</div>
-            <div class="box">5</div>
-            <div class="box">6</div>
-            <div class="box">7</div>
-            <div class="box">8</div>
-            <div class="box">9</div>
-            <div class="box">10</div>
-            <div class="box">11</div>
-            <div class="box">12</div>
-            <div class="box">13</div>
-            <div class="box">14</div>
-            <div class="box">15</div>
-            <div class="box">16</div>
-            <div class="box">17</div>
-            <div class="box">18</div>
-            <div class="box">19</div>
-            <div class="box">20</div>
-            <div class="box">21</div>
-            <div class="box">22</div>
-            <div class="box">23</div>
-            <div class="box">24</div>
-            <div class="box">25</div>
+
+        <button id="face" class="hidden"></button>
+    
+        <div id="container" class="hidden">
+            
         </div>
     <script src="index.js"></script>
     </body>

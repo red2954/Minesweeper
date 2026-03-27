@@ -4,15 +4,62 @@ body{
     display: flex;
     flex-direction: column;
     align-items: center;
+    font-family: "Carter One", sans-serif;
+    font-weight: 400;
+    font-style: normal; 
+}
+
+.carter-one-regular {
+  font-family: "Carter One", sans-serif;
+  font-weight: 400;
+  font-style: normal;
 }
 
 #container{
     display: grid;
     border: 2px solid rgb(80, 72, 72);
-    grid-template-columns: repeat(5, 25px);
-    grid-template-rows: repeat(5, 25px);
     margin: 0 auto;
     
+}
+
+#difficulties{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-evenly;
+    height: 210px;
+}
+
+.difficulty {
+    width: 300px;
+    height: 30px;
+    border-radius: 20px;
+    background: linear-gradient(var(--color), var(--color)),
+                white;
+    background-size: 0% 100%, 100% 100%;
+    background-position: center center, center center;
+    background-repeat: no-repeat, no-repeat;    
+    transition: background-size 0.5s;
+}
+
+.difficulty:hover{
+    background-size: 100% 100%, 100% 100%;
+}
+
+.green {
+    --color: rgb(17, 214, 17);
+}
+
+.yellow{
+    --color: rgb(255, 255, 0);
+}
+
+.red{
+    --color: red;
+}
+
+.hidden{
+    display: none !important;
 }
 
 .box{
@@ -30,27 +77,17 @@ body{
     background: white;
 }
 
-#header{
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
 #flag{
     width: 30px;
     height: 30px;
-    background-image: url("icon.png");
+    background-image: url("data/icon.png");
     background-size: cover;
 }
 
 #face{
     width: 30px;
     height: 30px;
-    background-image: url("alive.png");
+    background-image: url("data/alive.png");
     background-size: cover;
     margin-bottom: 20px;
-}
-
-#buttons{
-    padding-bottom: 20px;
 }

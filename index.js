@@ -54,7 +54,7 @@ function calculateBombsNearby(blocks) {
     for(let i = 0; i < rows; i++)
         for(let j = 0; j < cols; j++){
             if(blocks[i][j].isBomb){
-                for([x, y] of directions){
+                for(let [x, y] of directions){
                     let newI = i + x
                     let newJ = j + y
 
@@ -67,7 +67,7 @@ function calculateBombsNearby(blocks) {
 
 }
 
-function showBlocksWithoutBombs(blocks, row, col){
+function revealEmptyArea(blocks, row, col){
     let rows = blocks.length
     let cols = blocks[0].length
     const isPossible = row >= 0 &&  row < rows && col >= 0 && col < cols
@@ -80,23 +80,24 @@ function showBlocksWithoutBombs(blocks, row, col){
         return
 
     block.isPressed = true
+    gameSettings.visibleBlocks++
 
     if (block.bombsNearby > 0) 
         return
 
-    for([x, y] of directions){
+    for(let [x, y] of directions){
         let newI = row + x
         let newJ = col + y
-        showBlocksWithoutBombs(blocks, newI, newJ)
+        revealEmptyArea(blocks, newI, newJ)
         
     }
 }
 
-function renderBoard(blocks){
+function renderBoard(blocks, cols){
     const boxes = document.querySelectorAll(".box")
     boxes.forEach((box, i) =>{
-        const row = Math.floor(i / 5)
-        const col = i % 5
+        const row = Math.floor(i / cols)
+        const col = i % cols
         const block = blocks[row][col]
 
         box.textContent = "";
@@ -119,39 +120,74 @@ function renderBoard(blocks){
     })
 }
 
+function createBoard(rows, cols){
+    const container = document.getElementById("container")
+    container.innerHTML = ""
+    container.style.gridTemplateColumns = `repeat(${cols}, 25px)`
+    container.style.gridTemplateRows = `repeat(${rows}, 25px)`
+    for(let i = 1; i <= rows * cols; i++){
+        let block = document.createElement("div")
+        block.classList.add("box")
+        container.appendChild(block)
+        
+    }
+}
+
+let buttons = document.querySelectorAll(".difficulty")
+buttons[0].addEventListener("click", () => startGame(9, 9, 10))
+buttons[1].addEventListener("click", () => startGame(16, 16, 40))
+buttons[2].addEventListener("click", () => startGame(16, 30, 99))
 
 
 let blocks = []
 let gameOver = false
+let gameSettings = {}
 const restart = document.getElementById("face")
-restart.addEventListener("click", () =>{
-    const oldMsg = document.getElementById("GameOverMessage")
-    if(oldMsg)
-        oldMsg.remove()
+const container = document.getElementById("container")
+function startGame(rows, cols, bombs){
+    blocks = []
+    restart.style.backgroundImage = `url(data/alive.png)`
+    createBoard(rows, cols)
+    restart.classList.remove("hidden")
+    container.classList.remove("hidden")
+    gameSettings = {rows: rows, cols: cols, bombs: bombs, visibleBlocks: 0}
+
     gameOver = false
-    for (let i = 0; i < 5; i++) {
+
+    const oldMsg1 = document.getElementById("GameOverMessage")
+    if (oldMsg1) 
+        oldMsg1.remove()
+    
+    const oldMsg2 = document.getElementById("WinMessage")
+    if(oldMsg2)
+        oldMsg2.remove()
+
+
+    for (let i = 0; i < rows; i++) {
         blocks[i] = [] 
-        for (let j = 0; j < 5; j++) {
+        for (let j = 0; j < cols; j++) {
             blocks[i][j] = new Block(false, 0, false, false)
         }
     }
+
     let nrBombs = 0
-    while(nrBombs < 4){
-        let number1 = Math.floor(Math.random() * 5)
-        let number2 = Math.floor(Math.random() * 5)
+    while(nrBombs < bombs){
+        let number1 = Math.floor(Math.random() * rows)
+        let number2 = Math.floor(Math.random() * cols)
         if(!blocks[number1][number2].isBomb){
             blocks[number1][number2].isBomb = true
             nrBombs++
         }
     }
+
     calculateBombsNearby(blocks)
 
     const boxes = document.querySelectorAll(".box")
     boxes.forEach((box, i) =>{
         box.textContent = ""
         box.classList.remove("pressed")
-        const row = Math.floor(i / 5)
-        const col = i % 5
+        const row = Math.floor(i / cols)
+        const col = i % cols
         box.onclick = () => {
             if(gameOver)
                 return
@@ -165,20 +201,33 @@ restart.addEventListener("click", () =>{
                         const text = document.createTextNode("Game Over! Good luck next time!")
                         document.querySelector("body").appendChild(newDiv)
                         newDiv.appendChild(text)
+                        restart.style.backgroundImage = `url(data/dead.jpg)`
                         gameOver = true
                     }
-                    renderBoard(blocks)
+                    renderBoard(blocks, cols)
                 }
                 else
                     if(block.bombsNearby != 0){
                         block.isPressed = true
-                        renderBoard(blocks)
+                        gameSettings.visibleBlocks++
+                        renderBoard(blocks, cols)
                     }
                     else{
-                        showBlocksWithoutBombs(blocks, row, col)
-                        renderBoard(blocks)
+                        revealEmptyArea(blocks, row, col)
+                        renderBoard(blocks, cols)
                     }
             }
+            if (gameSettings.visibleBlocks === rows * cols - gameSettings.bombs) {
+            gameOver = true
+            const oldWin = document.getElementById("WinMessage")
+            const win = document.createElement("h2")
+            win.id = "WinMessage"
+            win.textContent = "Congratulations! You won!"
+            document.body.appendChild(win)
+            restart.style.backgroundImage = `url(data/win.png)`
+            return
+            
+    }
         }
         box.oncontextmenu = (e) =>{
             e.preventDefault();
@@ -190,7 +239,17 @@ restart.addEventListener("click", () =>{
             if (block.isPressed) return;
 
             block.isFlagged = !block.isFlagged;
-            renderBoard(blocks);
+            renderBoard(blocks, cols);
         }
     })
+    renderBoard(blocks, cols)
+}
+
+
+restart.addEventListener("click", () =>{
+    const oldMsg = document.getElementById("GameOverMessage")
+    if(oldMsg)
+        oldMsg.remove()
+    gameOver = false
+    startGame(gameSettings.rows, gameSettings.cols, gameSettings.bombs)
 })
